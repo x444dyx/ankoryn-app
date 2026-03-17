@@ -189,6 +189,7 @@ export default function App() {
 
       if (!data.valid) {
         localStorage.removeItem("ankoryn_license_key");
+        localStorage.removeItem("ankoryn_unlocked"); 
       }
 
     } catch (err) {
@@ -207,7 +208,8 @@ useEffect(() => {
 
   if (params.get("success") === "true") {
 
-    alert("🎉 Purchase successful! Check your email for your Ankoryn licence key.");
+    alert("🎉 Purchase successful! Your licence key has been emailed. Enter it to unlock Ankoryn Pro.");
+    setShowUpgradeModal(true);
 
     // Clean URL so it doesn't trigger again
     window.history.replaceState({}, "", "/");
@@ -468,7 +470,12 @@ async function activateLicense() {
                     setWorkspaceId(w.id);
                     await setActiveWorkspaceId(w.id);
                     const history = await getWorkspaceHistory(w.id);
-                    setMessages(history);
+                    setMessages(
+  history.map((m: any) => ({
+    role: m.role === "user" ? "user" : "assistant",
+    content: String(m.content ?? "")
+  }))
+);
                     const modelConfig = await getWorkspaceModel(w.id);
                     if (modelConfig) setModel(modelConfig.provider as ModelProvider);
                     refreshTransparency(w.id);
@@ -982,7 +989,14 @@ async function activateLicense() {
                             const ws = await listWorkspaces();
                             setWorkspaces(ws.map(w => ({ id: w.id!, name: w.name })));
                             setWorkspaceId(newId);
-                            setMessages(await getWorkspaceHistory(newId));
+                            const history = await getWorkspaceHistory(newId);
+
+setMessages(
+  history.map((m: any) => ({
+    role: m.role === "user" ? "user" : "assistant",
+    content: String(m.content ?? "")
+  }))
+);
                             refreshTransparency(newId);
                           }
                         }} 
@@ -1029,7 +1043,14 @@ async function activateLicense() {
                             setWorkspaces(ws.map(w => ({ id: w.id!, name: w.name })));
                             const newActive = await ensureDefaultWorkspace();
                             setWorkspaceId(newActive);
-                            setMessages(await getWorkspaceHistory(newActive));
+                            const history = await getWorkspaceHistory(newActive);
+
+setMessages(
+  history.map((m: any) => ({
+    role: m.role === "user" ? "user" : "assistant",
+    content: String(m.content ?? "")
+  }))
+);
                             refreshTransparency(newActive);
                           }}
                           className="px-6 py-3 bg-red-500 text-white rounded-xl font-bold text-sm hover:scale-105 transition-transform"
