@@ -1,44 +1,65 @@
-import { NextResponse } from "next/server";
-import crypto from "crypto";
+import Stripe from "stripe";
+import { headers } from "next/headers";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+function generateLicenseKey() {
+  return "ANK-" + Math.random().toString(36).substring(2, 10).toUpperCase();
+}
 
 export async function POST(req: Request) {
+  const body = await req.text();
+  const sig = headers().get("stripe-signature")!;
+
+  let event: Stripe.Event;
+
   try {
-    const body = await req.json();
+    event = stripe.webhooks.constructEvent(
+      body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET!
+    );
+  } catch (err) {
+    console.error("Webhook signature failed:", err);
+    return new Response("Invalid signature", { status: 400 });
+  }
 
-    if (body.type !== "checkout.session.completed") {
-      return NextResponse.json({ received: true });
-    }
+  // 🎯 PAYMENT SUCCESS
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
 
-    const email = body?.data?.object?.customer_details?.email;
+    const email = session.customer_details?.email;
 
     if (!email) {
-      return NextResponse.json(
-        { error: "Missing customer email" },
-        { status: 400 }
-      );
+      console.error("No email found on session");
+      return new Response("Missing email", { status: 400 });
     }
 
-    const licenseKey = `ANK-${crypto.randomBytes(2).toString("hex").toUpperCase()}-${crypto.randomBytes(2).toString("hex").toUpperCase()}-${crypto.randomBytes(2).toString("hex").toUpperCase()}`;
+    const licenseKey = generateLicenseKey();
 
-    await fetch(process.env.GOOGLE_SCRIPT_URL!, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-  action: "create",
-  email,
-  license_key: licenseKey,
-}),
-    });
+    console.log("💰 Payment success:", email);
+    console.log("🔑 Generated key:", licenseKey);
 
-    return NextResponse.json({ success: true });
+    // 🔥 CALL GOOGLE SCRIPT
+    try {
+      await fetch(process.env.LICENSE_VERIFY_URL!, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "create",
+          email,
+          license_key: licenseKey,
+        }),
+      });
 
-  } catch (err) {
-    console.error("Stripe webhook error:", err);
-    return NextResponse.json(
-      { error: "Webhook failed" },
-      { status: 500 }
-    );
+      console.log("✅ Licence stored + email sent");
+
+    } catch (err) {
+      console.error("❌ Failed to store licence:", err);
+    }
   }
+
+  return new Response("OK", { status: 200 });
 }
