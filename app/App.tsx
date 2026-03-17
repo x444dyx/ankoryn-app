@@ -411,7 +411,7 @@ async function activateLicense() {
   }
 
   return (
-    <div className="flex h-screen bg-black text-white overflow-hidden font-sans">
+    <div className="flex h-[100dvh] bg-black text-white overflow-hidden font-sans">
       {/* SIDEBAR */}
       <aside className="w-72 flex flex-col border-r border-white/5 bg-zinc-950/50 backdrop-blur-xl">
         <div className="p-6 flex items-center gap-3">
@@ -579,7 +579,7 @@ async function activateLicense() {
         </header>
 
         {/* CHAT MESSAGES */}
-        <div className="flex-1 overflow-y-auto p-8 space-y-8">
+        <div className="flex-1 overflow-y-auto px-4 py-4 md:p-8 space-y-6 md:space-y-8">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center max-w-2xl mx-auto space-y-8">
               <motion.div 
@@ -639,7 +639,7 @@ async function activateLicense() {
                     {m.role === "assistant" ? <Brain size={20} /> : <div className="font-bold text-xs">YOU</div>}
                   </div>
                   <div className={cn(
-                    "space-y-2 max-w-[85%]",
+                    "space-y-2 max-w-[90%] md:max-w-[85%]",
                     m.role === "user" ? "text-right" : "text-left"
                   )}>
                     <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">
@@ -679,7 +679,7 @@ async function activateLicense() {
         </div>
 
         {/* INPUT AREA */}
-        <div className="p-8 pt-0">
+        <div className="shrink-0 px-4 pb-4 md:p-8 pt-0 bg-black border-t border-white/5">
           <div className="max-w-3xl mx-auto relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-blue-500/20 rounded-[2rem] blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
             <div className="relative flex items-center gap-4 bg-zinc-900/80 border border-white/10 p-2 pl-6 rounded-[1.8rem] backdrop-blur-xl focus-within:border-emerald-500/50 transition-colors">
