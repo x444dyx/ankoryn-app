@@ -1,6 +1,6 @@
 import "./globals.css";
 export const metadata = {
-  title: "Ankoryn",
+  title: "Ankoryn Chat",
   description: "Persistent AI Workspace OS"
 };
 
