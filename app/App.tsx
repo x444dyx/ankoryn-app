@@ -222,7 +222,12 @@ useEffect(() => {
     setWorkspaceId(activeId);
 
     const history = await getWorkspaceHistory(activeId);
-    setMessages(history);
+    setMessages(
+  history.map((m: any) => ({
+    role: m.role === "user" ? "user" : "assistant",
+    content: String(m.content ?? "")
+  }))
+);
 
     const modelConfig = await getWorkspaceModel(activeId);
     if (modelConfig) {
