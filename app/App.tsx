@@ -293,24 +293,8 @@ useEffect(() => {
   };
 
   async function upgrade() {
-  try {
-    const res = await fetch("/api/create-checkout", {
-      method: "POST",
-    });
-
-    const data = await res.json();
-
-    if (data?.url) {
-      window.location.href = data.url;
-    } else {
-      alert("Checkout failed.");
-    }
-
-  } catch (err) {
-    console.error(err);
-    alert("Unable to start checkout.");
+    window.open("https://layerbuzz.ayteelabs.com/p/ayteelabs/ankoryn-pro", "_blank");
   }
-}
 
 async function activateLicense() {
   try {
